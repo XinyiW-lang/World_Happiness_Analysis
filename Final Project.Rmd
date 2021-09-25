@@ -1,0 +1,81 @@
+---
+title: "Final Project"
+author: "Xinyi Wang"
+date: "07/12/2020"
+output: pdf_document
+---
+
+```{r setup,  message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(knitr)
+happiness_data <- 
+  read_csv(("D:\\Courses\\MATH 208\\Final Project\\Project_Happiness_data.csv"))
+```
+
+```{r task1}
+data_2019 <- happiness_data %>% filter(Year == 2019)
+#(a)
+new_data_2019 <- data_2019 %>% 
+  select( c("Region", "GDPperCap","TrustGov", "Family","Freedom",
+            "HealthLifeExp","Generosity"))%>%
+  pivot_longer(cols = c("GDPperCap", "TrustGov",
+                        "Family","Freedom",
+                        "HealthLifeExp","Generosity"),
+               names_to = "Scores")
+new_data_2019
+new_data_2019 %>% ggplot(aes(x=Region,fill = Region, y = value))+
+  geom_boxplot()+facet_wrap(~Scores) + labs(x="")+
+  theme(axis.text.x = element_blank())
+```
+Task1\newline
+(a) The numerical summary and the plots are provided as above.\newline
+In my opinion the boxplot is the most informative plot in showing the relationship between the multiple quantitive data and one qualitative data. In order to get the boxplot, we need to get the pivot_longer version of the data.\newline
+
+(b) The association between score and region varies amongst the scores. Based on the locations of boxes in each score, where the 25th to the 75th percentile belong, different scores show the different trends among regions. The median of each score in each region also shows the different association.\newline
+
+```{r task2}
+total_happiness <- happiness_data %>% group_by(Country,Year)%>% 
+  mutate(TotalScore = sum(GDPperCap,TrustGov,Family,
+            Freedom,HealthLifeExp,Generosity))%>% ungroup()%>%
+  summarise(Country,Year,Region,TotalScore)
+total_happiness
+extreme <- total_happiness %>% group_by(Region,Year)%>%
+  mutate(Max = max(TotalScore,na.rm = TRUE), 
+         Min = min(TotalScore,na.rm = TRUE))%>% 
+  ungroup()%>%summarise(Year,Region,Max,Min) %>% unique()
+extreme
+extreme_for_plot <- extreme %>% 
+  pivot_longer(cols=c(Max, Min), names_to = "Variable")
+extreme_for_plot %>% group_by(Region) %>%
+  ggplot(aes(x=Year,y=value,col= Variable))+
+  geom_line()+geom_point()+facet_wrap(~Region)
+ 
+```
+Task2\newline
+(b) The minimum and maximum happiness scores doesn't change much over time. In each region, the maximum and minimum values all change around a value in a small range. And all values decrease in Year 2016, and increase after Year 2016.\newline
+
+Task3
+(a)
+```{r task3_a}
+average_by_country<-total_happiness %>% group_by(Country) %>% 
+  mutate(Average = mean(TotalScore))%>% ungroup()%>%
+  summarise(Country,Average)%>%arrange(desc(Average))%>%
+  unique()
+average_by_country%>% head(10)%>%kable()
+```
+(b)
+```{r task3_b}
+tbl_for_diff <- total_happiness %>% 
+  filter(Year == 2015 | Year == 2019)%>%
+  pivot_wider(id_cols=Country,names_from=Year,
+              values_from=TotalScore)
+diff_happiness <- tbl_for_diff %>%
+  mutate(Diff = pull(tbl_for_diff,"2019") - 
+           pull(tbl_for_diff,"2015")) %>%
+  summarise(Country,Diff)%>%arrange(desc(Diff))
+diff_happiness %>% head(10) %>% kable()
+```
+
+
+
