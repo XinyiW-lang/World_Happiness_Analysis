@@ -9,7 +9,7 @@ R markdown file: Final Project.rmd
 Report: Final_Project.pdf
 This project contains some exploratory analyses based on the data from the World Happiness Report (https://www.kaggle.com/unsdsn/world-happiness/data)
 
-This report includs mainly 3 analysis
+This report includs 3 main analysis
 
 1. The Family, Generosity and Freedom by Region in 2019: 
     Describes the distribution of the association of each of the 6 scores with the region variabe using the box plot
